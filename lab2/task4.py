@@ -34,7 +34,7 @@ if __name__ == "__main__":
     
     for i in range(N):
         forks.append(RLock())
-    # creare liste de thread-uri
+    # creare lista de thread-uri
     for i in range(N):
         philosophers.append(Philosopher(i + 1, forks[i], forks[(i + 1) % N]))
     
