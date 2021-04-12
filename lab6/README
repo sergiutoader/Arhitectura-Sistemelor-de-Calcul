@@ -1,0 +1,172 @@
+Toader Sergiu-Cristian
+335CB
+
+-- Lab 6 --
+
+TASK 1
+
+TODO 1 / 2:
+end = 40000 ->
+real	0m0.201s
+user	0m0.194s
+sys	0m0.003s
+
+
+end = 100000 ->
+real	0m1.098s
+user	0m1.093s
+sys	0m0.000s
+
+
+end = 200000 ->
+real	0m3.475s
+user	0m3.463s
+sys	0m0.003s
+
+
+end = 300000 ->
+real	0m6.545s
+user	0m6.535s
+sys	0m0.005s
+
+
+end = 400000 ->
+real	0m11.336s
+user	0m11.325s
+sys	0m0.004s
+
+
+TODO 3 / 4:
+end = 40000 ->
+real	0m0.038s
+user	0m0.841s
+sys	0m0.092s
+
+
+end = 100000 ->
+real	0m0.138s
+user	0m2.691s
+sys	0m0.198s
+
+
+end = 200000 ->
+real	0m0.333s
+user	0m8.274s
+sys	0m0.048s
+
+
+end = 300000 ->
+real	0m0.633s
+user	0m14.735s
+sys	0m0.114s
+
+
+end = 400000 ->
+real	0m1.023s
+user	0m23.396s
+sys	0m0.077s
+
+
+-- TASK 2
+
+Am analizat tab-urile de Functions, Callers-Callees, Call Tree, Disassembly.
+In cazul rularii programului in modul open-mpi se pot observa timpii de executie
+pentru fiecare thread in parte (aproximativ 40 de thread-uri).
+
+-- TASK 3
+
+
+make[1]: Leaving directory `/export/home/acs/stud/s/sergiu.toader/tachyon'
+make VERSION=find_hotspots run_one
+make[1]: Entering directory `/export/home/acs/stud/s/sergiu.toader/tachyon'
+./tachyon_find_hotspots  dat/balls.dat
+Warning: Can't attach shared memory to display: BadRequest (invalid request code or no such operation) (1)
+Note: using generic X11 with default visual for 24-bit color depth
+Scene contains 7386 bounded objects.
+
+CPU Time: 42.372 seconds.
+make[1]: Leaving directory `/export/home/acs/stud/s/sergiu.toader/tachyon'
+make VERSION=analyze_locks run_one
+make[1]: Entering directory `/export/home/acs/stud/s/sergiu.toader/tachyon'
+./tachyon_analyze_locks  dat/balls.dat
+Warning: Can't attach shared memory to display: BadRequest (invalid request code or no such operation) (1)
+Note: using generic X11 with default visual for 24-bit color depth
+Scene contains 7386 bounded objects.
+
+CPU Time: 23.493 seconds.
+
+
+-- TASK 4
+
+valgrind --tool=cachegrind --branch-sim=yes ./mult_reorder 1
+==23000== I   refs:      4,126,870,508
+==23000== I1  misses:              722
+==23000== LLi misses:              719
+==23000== I1  miss rate:          0.00%
+==23000== LLi miss rate:          0.00%
+==23000== 
+==23000== D   refs:      1,751,046,151  (1,625,781,130 rd   + 125,265,021 wr)
+==23000== D1  misses:      111,956,203  (  111,955,657 rd   +         546 wr)
+==23000== LLd misses:           95,317  (       94,811 rd   +         506 wr)
+==23000== D1  miss rate:           6.4% (          6.9%     +         0.0%  )
+==23000== LLd miss rate:           0.0% (          0.0%     +         0.0%  )
+==23000== 
+==23000== LL refs:         111,956,925  (  111,956,379 rd   +         546 wr)
+==23000== LL misses:            96,036  (       95,530 rd   +         506 wr)
+==23000== LL miss rate:            0.0% (          0.0%     +         0.0%  )
+==23000== 
+==23000== Branches:        125,522,253  (  125,521,954 cond +         299 ind)
+==23000== Mispredicts:         252,892  (      252,826 cond +          66 ind)
+==23000== Mispred rate:            0.2% (          0.2%     +        22.1%   )
+
+
+valgrind --tool=cachegrind --branch-sim=yes ./mult_reorder 2
+==23003== I   refs:      4,126,870,505
+==23003== I1  misses:              722
+==23003== LLi misses:              719
+==23003== I1  miss rate:          0.00%
+==23003== LLi miss rate:          0.00%
+==23003== 
+==23003== D   refs:      1,751,046,151  (1,625,781,130 rd   + 125,265,021 wr)
+==23003== D1  misses:       15,689,846  (   15,689,300 rd   +         546 wr)
+==23003== LLd misses:           95,317  (       94,811 rd   +         506 wr)
+==23003== D1  miss rate:           0.9% (          1.0%     +         0.0%  )
+==23003== LLd miss rate:           0.0% (          0.0%     +         0.0%  )
+==23003== 
+==23003== LL refs:          15,690,568  (   15,690,022 rd   +         546 wr)
+==23003== LL misses:            96,036  (       95,530 rd   +         506 wr)
+==23003== LL miss rate:            0.0% (          0.0%     +         0.0%  )
+==23003== 
+==23003== Branches:        125,522,252  (  125,521,953 cond +         299 ind)
+==23003== Mispredicts:         252,892  (      252,826 cond +          66 ind)
+==23003== Mispred rate:            0.2% (          0.2%     +        22.1%   )
+
+
+valgrind --tool=cachegrind --branch-sim=yes ./mult_reorder 3
+==23006== I   refs:      4,126,870,507
+==23006== I1  misses:              722
+==23006== LLi misses:              719
+==23006== I1  miss rate:          0.00%
+==23006== LLi miss rate:          0.00%
+==23006== 
+==23006== D   refs:      1,751,046,151  (1,625,781,130 rd   + 125,265,021 wr)
+==23006== D1  misses:      250,251,830  (  250,251,284 rd   +         546 wr)
+==23006== LLd misses:           95,317  (       94,811 rd   +         506 wr)
+==23006== D1  miss rate:          14.3% (         15.4%     +         0.0%  )
+==23006== LLd miss rate:           0.0% (          0.0%     +         0.0%  )
+==23006== 
+==23006== LL refs:         250,252,552  (  250,252,006 rd   +         546 wr)
+==23006== LL misses:            96,036  (       95,530 rd   +         506 wr)
+==23006== LL miss rate:            0.0% (          0.0%     +         0.0%  )
+==23006== 
+==23006== Branches:        125,522,253  (  125,521,954 cond +         299 ind)
+==23006== Mispredicts:         252,893  (      252,827 cond +          66 ind)
+==23006== Mispred rate:            0.2% (          0.2%     +        22.1%   )
+
+
+
+
+
+
+
+
