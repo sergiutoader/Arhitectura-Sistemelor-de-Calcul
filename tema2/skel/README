@@ -1,0 +1,118 @@
+Nume: Toader Sergiu-Cristian
+Grupa: 335CB
+
+--- Tema 2 ASC ---
+
+Implementare neopt:
+Implementarea consta in operatii simple, de complexitate O(N^3) pentru inmultire
+si O(N^2) pentru adunare si transpunere a matricei. Implementarea tine cont de
+faptul ca matricea A este superior triunghiulara. Astfel, transpusa matricei A
+este calculata folosind functia speciala transposeUpperTriangular. Elementele de
+pe linie nu sunt parcurse de la 0 la N, ci de la i la N, astfel se transpun in
+matricea rezultat doar elementele aflate pe sau deasupra diagonalei principale.
+In plus, aceasta parcurgere partiala a elementelor pe linie se aplica si la
+inmultirea matricelor, atunci cand operandul din stanga este matricea A (upper
+triangular) sau AT (lower triangular).
+--------------------------------------------------------------------------------
+Implementare opt_m:
+Implementarea consta in aceleasi operatii de complexitate O(N^3) pentru
+inmultire si O^(N^2) pentru adunare si transpunere, insa realizata cu anumite
+optimizari. In cazul functiilor de transpunere, adresa fiecarui inceput de linie
+este calculata inainte de parcurgerea elementelor si salvata intr-un pointer.
+Astfel, elementele sunt accesate prin intermediul acestui pointer, nemaifiind
+necesara calcularea adresei fiecarui element prin inmultire si adunare la
+fiecare pas, ci doar o adunare. Aceasta procedura de calculare a adresei de
+inceput a liniei este aplicata si pentru calculul produsului A * B, a produsului
+AB * BT, a produsului AT * A, si a sumei finale.
+O alta metoda de optimizare este declararea pointerilor ca variabile register,
+intrucat acestia vor fi accesati de mai multe ori fara sa le fie modificata
+valoarea, deci pot fi trecuti ca register pentru un acces mai rapid. Metoda este
+folosita in cadrul tuturor operatiilor: de adunare, de inmultire si de
+transpunere. Pe langa pointeri, si valoarea care nu se schimba in for-ul
+interior se va salva ca register (a_i, ab_i, at_i).
+Pentru optimizare suplimentara, se utilizeaza pentru fiecare inmultire de
+matrice metoda loop unrolling in for-ul interior. in loc sa se verifice
+iesirea din for la fiecare pas, verificare care este costisitoare din punct de
+vedere al timpului si care poate genera branch prediction gresit, se va desface
+for-ul, executandu-se cate 8 calcule inainte de a se verifica iesirea din for.
+Utilizarea acestei tehnici se bazeaza pe faptul ca tema trateaza doar calcule
+cu matrice de dimensiune divizibila cu 40.
+Ultima optimizare care a fost implementata este schimbarea buclelor for intr-o
+structura de tip k-i-j, care este mai rapida decat o structura i-j-k.
+
+--------------------------------------------------------------------------------
+Implementare blas:
+Aceasta implementare este realizata folosind functiile din biblioteca cblas:
+cblas_copy pentru copiera unei matrice in alta matrice, cblas_dtrmm pentru
+inmultirea dintre o matrice triunghiulara si o matrice normala, cblas_dgemm
+pentru inmultirea dintre doua matrice normale si functia cblas_daxpy pentru
+adunarea a doua matrice liniarizate.
+Pentru inceput, se copiaza matricea B in matricea prod_aux. Se realizeaza apoi
+inmultirea intre A si prod_aux, cu rezultatul salvat in prod_aux. Se realizeaza
+apoi inmultirea prod_aux * B transpus, rezultatul fiind salvat in variabla
+prod1. In acest moment, prod1 este egal cu ABAT.
+Mai departe, se copiaza in result matricea, A, se realizeaza inmultirea dintre
+A transpus si result, rezultatul inmultirii viind salvat in matricea result.
+Se adunarea dintre prod1 si result, rezultatul fiind salvat in variabila result.
+In final, se elibereaza matricele auxiliare folosite si se intoarce result.
+Functiile de adunare si inmultite se apeleaza cu CblasRowMajor, asa cum este 
+specific limbajului C. Pentru matricele triunghiulare, functiile sunt apelate
+cu parametrul CblasUpper sau CblasLower si CblasTrans (pentru AT). Toate
+dimensiunile sunt setate la N.
+
+--------------------------------------------------------------------------------
+
+Explicatii cachegrind
+
+Se observa faptul ca varianta neoptimizata este lenta deoarece in cadrul ei se
+fac foarte multe accesari ale memoriei ( 5,930,263,035). Din acest motiv,
+referintele la cache D, la cache LL si branch-urile sunt in numar mare. In cazul
+variantei optimizate, Toate problemele mentionate mai sus sunt rezolvate,
+numarul de accesari la memorie scade (2,629,770,107), referintele la cache D,
+mai ales cele de citire scad semnificativ (de la 2,834,643,156 rd la 
+703,596,290 rd). LL refs scad de asemenea (accesele de citire de la 112,196,508
+rd la 16,492,374 rd), chiar daca accesele de scriere cresc usor, timpul se 
+reduce considerabil per total. Numarul de branch-uri scade de asemenea de la
+131,981,541 la 20,001,995, precum si numarul de branch mispredict-uri. Chiar
+daca procentul de branch mispredicts este usor mai mare, numarul lor redus
+faciliteaza o performanta mai buna.
+
+--------------------------------------------------------------------------------
+
+Explicatii grafic
+
+Valorilele de pe grafic au fost generate in urma rularii pe coada nehalem:
+
+Run=./tema2_opt_m: N=400: Time=0.370911
+Run=./tema2_opt_m: N=600: Time=1.059697
+Run=./tema2_opt_m: N=800: Time=2.480930
+Run=./tema2_opt_m: N=1000: Time=4.839830
+Run=./tema2_opt_m: N=1200: Time=8.450072
+
+
+
+Run=./tema2_neopt: N=400: Time=1.210854
+Run=./tema2_neopt: N=600: Time=3.907392
+Run=./tema2_neopt: N=800: Time=9.525268
+Run=./tema2_neopt: N=1000: Time=17.679396
+Run=./tema2_neopt: N=1200: Time=31.655401
+
+
+
+Run=./tema2_blas: N=400: Time=0.060026
+Run=./tema2_blas: N=600: Time=0.137057
+Run=./tema2_blas: N=800: Time=0.291186
+Run=./tema2_blas: N=1000: Time=0.501703
+Run=./tema2_blas: N=1200: Time=0.871381
+
+
+Se poate observa o crestere liniara pana la valoarea N = 1000, dupa care urmeaza
+o crestere accelerata a timpului rulare in cazul rularii neopt si opt_m.
+
+
+
+
+
+
+
+
