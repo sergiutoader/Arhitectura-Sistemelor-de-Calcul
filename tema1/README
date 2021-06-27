@@ -1,0 +1,112 @@
+Nume: Toader Sergiu-Cristian
+Grupa: 335CB
+
+Tema 1 - Arhitectura Sistemelor de Calcul
+
+
+Observatie: Singura modificare adusa antetului a fost adaugarea unei metode
+de egalitate (__eq__) in clasa Product (fisier product.py) pentru a realiza
+verificarea egalitatii intre doua obiecte de tip produs mai usor la eliminarea
+acestora / verificarea existentei acestora in cozile alocate producatorilor.
+
+
+- Implementare Producer:
+Intrega implementare a functionalitatii producatorului este realizata in metoda
+run a clasei Producer. Metoda run contine o bucla infinita care realizeaza in
+mod continuu publicarea de produse cater market_place. In interiorul acestei
+bucle, se itereaza prin fiecare item din lista self.products, se extrag
+atributele itemilor (obiectul de tip Product, cantitatea si timpul de asteptare)
+si se incearca, pe rand, publicarea cate unui proudus pana cand toate produsele
+din acea cantitate au fost publicate. Publicarea se face prin intermediul meto-
+dei publish. Daca metoda a intors false, se va face un sleep cu republish_wait-
+time si se va incerca din nou. Altfel, se va astepta wait_time (timpul de
+producere al produsului) si se va decrementa cantitatea. Acest proces se termina
+cand cantitatea devine 0. Se va trece la urmatorul produs din self.products si
+se va repeta bucla de publish. Cand se epuizeaza self.products, se reia tot
+procesul de pana acum, repetandu-se la infinit parcurgerea tuturor produselor.
+
+- Implementare Consumer
+Metoda run include un for loop in care este apelata metoda cart_operations pe
+fiecare cart din lista self.carts. Metoda cart_operations primeste ca parametru
+o lista reprezentand un cart. Apeleaza metoda new_cart pe instanta de market
+a clasei pentru a crea un cart nou gol. Se executa apoi fiecare operatie din
+lista de operatii. Executia unei operatii este reprezentata de urmatorii pasi:
+Se extrag tipul operatiei, produsul si cantitatea. Se executa apoi, pe rand
+fiecare cate o operatie pe acel produs pana cand cantitatea devine 0. Dupa
+executarea cu succes a unei operatii, se decrementeaza cantitatea si se repeta
+procesul.
+Operatii posibile:
+- add: se apeleaza metoda add_to_cart din marketplace cu id-ul cart-ului si cu
+produsul ce se doreste a fi adaugat. Daca adaugarea esueaza se asteapta un timp
+(retry_wait_time) si se incearca din nou.
+- remove: se apeleaza metoda remove_from_cart din marketplace cu id-ul cart-ului
+si cu produsul care se doreste a fi adaugat.
+Dupa ce toate operatiile s-au realizat cu succes, se apeleaza metoda place_order
+prin care se intoarce lista de produse achizitionate.
+In final, lista intoarsa de place_order si se afiseaza fiecare produs.
+
+- Implementare Marketplace
+Clase folosite:
+- ReservedProduct: Contine campurile product si reserved. Retine daca un produs
+este plasat intr-un cos de cumparaturi sau nu, pentru a nu putea fi in mai mult
+de un cos de cumparaturi la un moment dat. Are metode de setare si de get pentru
+campul reserved.
+
+- Cart: Contine un camp pentru o coada (queue). Contine metode de append si
+remove pentru prelucrarea cozii.
+
+- ProducerQueue: Este o clasa folosita pentru reprezentarea unei cozi in care
+sunt salvate obiectele produse de un producator.
+Contine urmatoarele campuri:
+	- lock - folosit pentru sincronizarea operatiilor
+	- queue_size - capacitatea maxima a cozii
+	- curr_size - numarul de elemente din coada
+	- queue - coada in care sunt stocate produsele
+Metode implementate:
+	- is_full - verifica daca numarul de elemente din coada este egal sau
+	depaseste capacitatea maxima
+	- append - adauga un element nou in coada. Daca coada este plina, adaugarea
+	nu se va realiza iar functia va intoarce false. In caz contrar, se adauga
+	un element nou in coada iar curr_size este incrementat. Toti acesti pasi
+	sunt realizati atunci cand lock-ul este detinut de functie.
+	- remove - elimina produsul dat ca parametru, si decrementeaza numarul de
+	elemente din coada, tot sincronizat, asemenea metodei append
+
+- Marketplace - contine metodele apelate de produceri si consumeri. Campurile
+acestei clase sunt urmatoarele:
+	- lock - este un obiect de tip Condition, este folosit pentru sincronizare
+	- producers - un set in care vor fi stocate cozile pentru produceri, cheile
+	folosite fiind id-urile coziilor
+	- producer_id - este o variabila incrementata la introducerea unei noi cozi
+	pentru producer, folosita pentru a atribui un identificator unic pentru
+	coada respectiva
+	- carts - un set in care vor fi stocate cozile pentru cosurile de
+	cumparaturi, cheile folosite fiind si in acest caz id-urile cart-urilor
+	- cart_id - variabila folosita pentru a atribui identificatori unici pentru
+	cosurile de cumparaturi, fiind incrementata dupa crearea unui nou obiect de
+	tip Cart
+	- queue_size - capacitatea maxima a cozilor pentru produceri
+
+Implementarea metodelor din Marketplace:
+- register_producer: se genereaza un nou id, prin incrementare, se adauga in
+setul producers un obiect de tip ProducerQueue nou. Functia intoarce id-ul nou
+generat.
+- publish - primeste un id de producer si un produs si incearca adaugarea
+prodului in coada corespunzatoare id-ului. Rezultatul apelului functiei append
+este propagat la retur.
+- new_cart - genereaza un id nou prin incrementare. Adauga un nou element de tip
+Cart in set-ul carts, cu cheia egala cu id-ul nou generat.
+- add_to_cart - functia primeste un id de cart si un produs, cauta produsul in
+fiecare coada si daca acesta este gasit si nu este deja rezervat, este adaugat
+in cos si este marcat ca rezervat.
+- remove_from_cart - primeste un de cart si un produs, elimina produsul din
+cart. Dupa aceea, produsul este cautat in fiecare ProducerQueue si in momentul
+in care este gasit, este setat ca unreserved, spre a putea fi rezervat de alt
+consumer.
+- place_order - primeste un id de cart. Se parcurg printr-un for produsele
+rezervate din cart-ul identificat prin id-ul dat ca parametru. Se cauta aceste
+produse in cozile de produse si se elimina. La final, functia intoarce o lista
+cu continutul cart-ului.
+
+Observatie: Metodele din clasa Marketplace sunt sincronizate folosind variabila
+self.lock
